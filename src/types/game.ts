@@ -4,9 +4,10 @@
     capital: string,
   }
   
-  export type AnswerCounter = {
-    badAnswers: number,
-    goodAnswers: number,
+  export type Answer = {
+    correctAnswer: Country | undefined,
+    badAnswersCount: number,
+    goodAnswersCount: number,
   }
 
   export enum InfoText {
