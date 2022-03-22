@@ -13,8 +13,11 @@ const Game = () => {
     const [loading, setLoading] = useState(false)
     const [countries, setCountries] = useState<Country[]>([])
     const [goodAnswer, setGoodAnswer] = useState<Country>()
-    const [answerCounter, setAnswerCounter] = useState<AnswerCounter>({...initialAnswerCounter})
-
+    const [answerCounter, setAnswerCounter] = useState<AnswerCounter>({
+        badAnswers: 0, 
+        goodAnswers: 0
+    })
+console.log(answerCounter)
     const formRef = useRef<any>();
 
     useEffect(()=> {
@@ -58,13 +61,13 @@ const Game = () => {
 
         if(wasGoodAnswer) {
             setAnswerCounter((prev)=> ({...prev, goodAnswers: prev.goodAnswers++}));
-            if(answerCounter.goodAnswers === 5) return handleEndGame(true)
+            if(answerCounter.goodAnswers === 4) return handleEndGame(true)
 
             handlePlay();
             setInfoText(()=> `Bonne réponse, devinez encore ${5 - answerCounter.goodAnswers} capitales pour gagner`)
         } else {
             setAnswerCounter((prev)=> ({...prev, badAnswers: prev.badAnswers++}));
-            answerCounter.badAnswers === 3 ? handleEndGame(false)  : setInfoText(()=> `Mauvaise réponse, il vous reste encore ${3 - answerCounter.badAnswers} essai`)
+            answerCounter.badAnswers === 2 ? handleEndGame(false)  : setInfoText(()=> `Mauvaise réponse, il vous reste encore ${3 - answerCounter.badAnswers} essai`)
         }
 
         formRef.current?.reset()
