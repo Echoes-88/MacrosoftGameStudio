@@ -8,10 +8,14 @@ import { GameContainer, GameForm, Input, Label } from "./Game.styles";
 const initialAnswer: Answer = {
     correctAnswer: undefined,
     badAnswersCount: 0, 
-    goodAnswersCount: 0
+    goodAnswersCount: 0,
+    flag: undefined
 }
 
 export const Game = () => {
+
+    const [apiCall, setApiCall] = useState<any>({url: "https://countriesnow.space/api/v0.1/countries/capital"})
+
     const [isPlaying, setIsPlaying] = useState(false)
     const [infoText, setInfoText] = useState("")
     const [countries, setCountries] = useState<Country[]>([])
@@ -20,14 +24,21 @@ export const Game = () => {
 
     const formRef = useRef<any>();
 
-    const { response, error, loading } = useFetch();
+
+    const { response, error, loading } = useFetch(apiCall.url, apiCall.options);
+
 
     useEffect(()=> {
-        if(response !== null) {
+        if(response && apiCall.url === "https://countriesnow.space/api/v0.1/countries/capital") {
             const filteredData = response.data.filter((country: Country) => country?.name && country?.capital)
             setCountries((countries)=> [...countries,...filteredData]);
         }
-    },[response])
+
+        if(response && apiCall.url === "https://countriesnow.space/api/v0.1/countries/flag/images") {
+            setAnswer((prev)=>({...prev, flag: response.data?.flag}))
+        }
+
+    },[response, apiCall.url])
 
 
     const handlePlay = () => {
@@ -37,6 +48,21 @@ export const Game = () => {
         const randomValue = getRandomValue(0, countries.length)
 
         setAnswer((prev)=> ({...prev, correctAnswer: countries[randomValue]}))
+
+        // Get country flag
+        setApiCall(()=> ({
+            url: "https://countriesnow.space/api/v0.1/countries/flag/images",
+            options: {
+                    method: "POST",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                      },
+                    body: JSON.stringify({
+                        "iso2": countries[randomValue].iso2
+                    })
+                  }
+        }))
     }
 
     const handleSubmit = (e: React.SyntheticEvent) => {
@@ -92,8 +118,13 @@ export const Game = () => {
             }
 
             {answer.correctAnswer &&
+                
                 <GameForm ref={formRef} onSubmit={(e)=>handleSubmit(e)}>
                     <Label>
+                        {answer.flag &&
+                           <img style={{display: 'block', margin: "auto"}} alt="country flag" width="200" src={answer.flag}/>
+                        }
+
                         Quelle est la capitale de {answer.correctAnswer.name} :
                         <Input type="text" name="answer" />
                     </Label>
