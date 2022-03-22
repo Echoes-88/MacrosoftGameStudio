@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import useFetch from "../../hook/useFetch";
-import { Answer, Country, InfoText} from "../../types/game";
+import { Answer, ApiCall, Country, InfoText} from "../../types/game";
 import { getRandomValue } from "../../utils/getRandomValue";
 import { GameContainer, GameForm, Input, Label } from "./Game.styles";
 
@@ -14,7 +14,7 @@ const initialAnswer: Answer = {
 
 export const Game = () => {
 
-    const [apiCall, setApiCall] = useState<any>({url: "https://countriesnow.space/api/v0.1/countries/capital"})
+    const [apiCall, setApiCall] = useState<ApiCall>({url: "https://countriesnow.space/api/v0.1/countries/capital"})
 
     const [isPlaying, setIsPlaying] = useState(false)
     const [infoText, setInfoText] = useState("")

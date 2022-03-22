@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { FetchResponse } from '../types/game';
 
-const useFetch = (url: string, options?: any) => {
+const useFetch = (url: string, options?: any): FetchResponse => {
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<any>(null);
   const [loading, setLoading] = useState(false);

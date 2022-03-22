@@ -1,3 +1,17 @@
+export type ApiCall = {
+    url: string,
+    options?: any
+  }
+
+  export type FetchResponse = {
+      response: {
+          error: boolean,
+          msg: string,
+          data: any
+      },
+      error: any,
+      loading: boolean
+  }
 
   export type Country = {
     name: string,
