@@ -1,7 +1,7 @@
-export type ApiCall = {
-    url: string,
-    options?: any
-  }
+// export type ApiCall = {
+//     url: string,
+//     options?: any
+//   }
 
   export type FetchResponse = {
       response: {
