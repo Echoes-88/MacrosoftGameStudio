@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
-import useFetch from "../../hook/useFetch";
-import { Answer, ApiCall, Country, InfoText} from "../../types/game";
+import { Answer, Country, InfoText} from "../../types/game";
 import { getRandomValue } from "../../utils/getRandomValue";
 import { GameContainer, GameForm, Input, Label } from "./Game.styles";
-
+import { ApiCall, CountriesDataType } from "../../store/game/types";
 
 const initialAnswer: Answer = {
     correctAnswer: undefined,
@@ -12,57 +11,53 @@ const initialAnswer: Answer = {
     flag: undefined
 }
 
-export const Game = () => {
+const Game:React.FC<{
+    countries: Country[],
+    apiCall: ApiCall,
+    isLoading: boolean,
+    getCountriesData: (url: string, options: any, dataType: CountriesDataType) => void,
+    updateApiCall: (url: string, options: any, dataType: CountriesDataType) => void,
+}>  = ({countries, apiCall, isLoading, getCountriesData, updateApiCall}) => {
 
-    const [apiCall, setApiCall] = useState<ApiCall>({url: "https://countriesnow.space/api/v0.1/countries/capital"})
 
     const [isPlaying, setIsPlaying] = useState(false)
     const [infoText, setInfoText] = useState("")
-    const [countries, setCountries] = useState<Country[]>([])
 
     const[answer, setAnswer] = useState<Answer>({...initialAnswer})
 
     const formRef = useRef<any>();
 
+    useEffect(()=> {
 
-    const { response, error, loading } = useFetch(apiCall.url, apiCall.options);
+        getCountriesData(apiCall.url, apiCall.options, apiCall.dataType)
 
+    },[apiCall, getCountriesData])
 
     useEffect(()=> {
-        if(response && apiCall.url === "https://countriesnow.space/api/v0.1/countries/capital") {
-            const filteredData = response.data.filter((country: Country) => country?.name && country?.capital)
-            setCountries((countries)=> [...countries,...filteredData]);
+
+        if(answer.correctAnswer) {  
+
+        updateApiCall("https://countriesnow.space/api/v0.1/countries/flag/images",
+        {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+            body: JSON.stringify({
+                "iso2": answer.correctAnswer.iso2
+            })
+          }, 
+          CountriesDataType.FLAG)
         }
-
-        if(response && apiCall.url === "https://countriesnow.space/api/v0.1/countries/flag/images") {
-            setAnswer((prev)=>({...prev, flag: response.data?.flag}))
-        }
-
-    },[response, apiCall.url])
-
+    },[answer, updateApiCall])
 
     const handlePlay = () => {
         setIsPlaying((isPlaying)=>!isPlaying)
         setInfoText(()=> "")
 
         const randomValue = getRandomValue(0, countries.length)
-
         setAnswer((prev)=> ({...prev, correctAnswer: countries[randomValue]}))
-
-        // Get country flag
-        setApiCall(()=> ({
-            url: "https://countriesnow.space/api/v0.1/countries/flag/images",
-            options: {
-                    method: "POST",
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                      },
-                    body: JSON.stringify({
-                        "iso2": countries[randomValue].iso2
-                    })
-                  }
-        }))
     }
 
     const handleSubmit = (e: React.SyntheticEvent) => {
@@ -107,9 +102,7 @@ export const Game = () => {
   return (
 
     <GameContainer>
-            {loading && <div>Loading...</div>}
-
-            {error && error.message}
+            {isLoading && <div>Loading...</div>}
 
             {countries.length &&
             <div>
@@ -138,3 +131,5 @@ export const Game = () => {
     </GameContainer>
   )
 }
+
+export default Game;
