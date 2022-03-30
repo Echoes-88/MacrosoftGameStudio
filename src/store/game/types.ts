@@ -1,10 +1,10 @@
 import { loading } from '../app/types';
 
 export interface Game {
-  countries: Country[];
-  badAnswersCount: number; 
-  goodAnswersCount: number;
-  flag: String;
+  countries: Country[],
+  countryToGuess: Country,
+  badAnswersCount: number, 
+  goodAnswersCount: number
 }
 
 export interface ApiCall {
@@ -21,9 +21,10 @@ export interface gameState {
 }
 
 export type Country = {
-  name: string,
-  capital: string,
-  iso2: string,
+  name: string | undefined,
+  capital: string | undefined,
+  iso2: string | undefined,
+  flag: string | undefined
 }
 
 // Actions
@@ -32,9 +33,11 @@ export enum GameActionTypes {
   UPDATE_ANSWER_COUNTER = 'UPDATE_ANSWER_COUNTER',
   GET_COUNTRIES_DATA = 'GET_COUNTRIES_DATA',
   UPDATE_COUNTRIES_DATA = 'UPDATE_COUNTRIES_DATA',
+  SET_COUNTRY_TO_GUESS = 'SET_COUNTRY_TO_GUESS',
   GET_FLAG = 'GET_FLAG',
   UPDATE_FLAG = "UPDATE_FLAG",
-  UPDATE_API_CALL = "UPDATE_API_CALL"
+  UPDATE_API_CALL = "UPDATE_API_CALL",
+  UPDATE_SCORE = "UPDATE_SCORE"
 }
 
 export enum CounterActionTypes {
@@ -45,6 +48,11 @@ export enum CounterActionTypes {
 export enum CountriesDataType {
   COUNTRIES = 'COUNTRIES',
   FLAG = 'FLAG',
+}
+
+export enum InfoText {
+  WIN = 'Gagné !',
+  LOOSE = 'Perdu'
 }
 
 interface UpdateAnswerCounter {
@@ -65,4 +73,9 @@ interface updateApiCall {
   dataType: CountriesDataType;
 }
 
-export type GameActions = UpdateAnswerCounter | updateCountriesData | updateApiCall | loading;
+interface setCountryToGuess {
+  type: GameActionTypes.SET_COUNTRY_TO_GUESS;
+  country: Country;
+}
+
+export type GameActions = UpdateAnswerCounter | updateCountriesData | updateApiCall | setCountryToGuess | loading;

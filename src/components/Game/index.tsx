@@ -1,29 +1,31 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Answer, Country, InfoText} from "../../types/game";
+
 import { getRandomValue } from "../../utils/getRandomValue";
 import { GameContainer, GameForm, Input, Label } from "./Game.styles";
-import { ApiCall, CountriesDataType } from "../../store/game/types";
+import { ApiCall, CounterActionTypes, CountriesDataType, Country, InfoText } from "../../store/game/types";
 
-const initialAnswer: Answer = {
-    correctAnswer: undefined,
-    badAnswersCount: 0, 
-    goodAnswersCount: 0,
-    flag: undefined
-}
+// const initialAnswer: Country = {
+//     name: undefined,
+//     capital: undefined,
+//     iso2: undefined,
+//     flag: undefined
+// }
 
 const Game:React.FC<{
     countries: Country[],
+    countryToGuess: Country,
     apiCall: ApiCall,
     isLoading: boolean,
+    goodAnswersCount: number,
+    badAnswersCount: number,
     getCountriesData: (url: string, options: any, dataType: CountriesDataType) => void,
     updateApiCall: (url: string, options: any, dataType: CountriesDataType) => void,
-}>  = ({countries, apiCall, isLoading, getCountriesData, updateApiCall}) => {
-
+    setCountryToGuess: (country: Country) => void,
+    updateAnswerCounter: (countActionType: CounterActionTypes) => void,
+}>  = ({countries, countryToGuess, apiCall, isLoading, goodAnswersCount, badAnswersCount, getCountriesData, updateApiCall, setCountryToGuess, updateAnswerCounter}) => {
 
     const [isPlaying, setIsPlaying] = useState(false)
     const [infoText, setInfoText] = useState("")
-
-    const[answer, setAnswer] = useState<Answer>({...initialAnswer})
 
     const formRef = useRef<any>();
 
@@ -35,7 +37,7 @@ const Game:React.FC<{
 
     useEffect(()=> {
 
-        if(answer.correctAnswer) {  
+        if(countryToGuess.iso2) {  
 
         updateApiCall("https://countriesnow.space/api/v0.1/countries/flag/images",
         {
@@ -45,19 +47,19 @@ const Game:React.FC<{
                 'Content-Type': 'application/json'
               },
             body: JSON.stringify({
-                "iso2": answer.correctAnswer.iso2
+                "iso2": countryToGuess.iso2
             })
           }, 
           CountriesDataType.FLAG)
         }
-    },[answer, updateApiCall])
+    },[countryToGuess.iso2, updateApiCall])
 
     const handlePlay = () => {
         setIsPlaying((isPlaying)=>!isPlaying)
         setInfoText(()=> "")
 
         const randomValue = getRandomValue(0, countries.length)
-        setAnswer((prev)=> ({...prev, correctAnswer: countries[randomValue]}))
+        setCountryToGuess(countries[randomValue])
     }
 
     const handleSubmit = (e: React.SyntheticEvent) => {
@@ -68,21 +70,22 @@ const Game:React.FC<{
           };
           const playerAnswer = target.answer.value.toLowerCase();
 
-          return playerAnswer === answer.correctAnswer?.capital.toLowerCase() ? handleEndTry(true) : handleEndTry(false)
+          return playerAnswer === countryToGuess.capital?.toLowerCase() ? handleEndTry(true) : handleEndTry(false)
     }
 
 
     const handleEndTry = (wasGoodAnswer: boolean) => {
 
         if(wasGoodAnswer) {
-            setAnswer((prev)=> ({...prev, goodAnswers: prev.goodAnswersCount++}));
-            if(answer.goodAnswersCount === 4) return handleEndGame(true)
+
+            updateAnswerCounter(CounterActionTypes.INC)
+            if(goodAnswersCount === 4) return handleEndGame(true)
 
             handlePlay();
-            setInfoText(()=> `Bonne réponse, devinez encore ${5 - answer.goodAnswersCount} capitales pour gagner`)
+            setInfoText(()=> `Bonne réponse, devinez encore ${5 - goodAnswersCount} capitales pour gagner`)
         } else {
-            setAnswer((prev)=> ({...prev, goodAnswers: prev.badAnswersCount++}));
-            answer.badAnswersCount === 2 ? handleEndGame(false)  : setInfoText(()=> `Mauvaise réponse, il vous reste encore ${3 - answer.badAnswersCount} essai`)
+            updateAnswerCounter(CounterActionTypes.DEC)
+            badAnswersCount === 2 ? handleEndGame(false)  : setInfoText(()=> `Mauvaise réponse, il vous reste encore ${3 - badAnswersCount} essai`)
         }
 
         formRef.current?.reset()
@@ -95,7 +98,8 @@ const Game:React.FC<{
         } else {
             setInfoText(()=> InfoText.LOOSE)
         }
-        setAnswer(()=> ({...initialAnswer}))
+        // To do : reset game
+        // setAnswer(()=> ({...initialAnswer}))
         setIsPlaying((isPlaying)=> !isPlaying)
     }
 
@@ -110,15 +114,15 @@ const Game:React.FC<{
             </div>
             }
 
-            {answer.correctAnswer &&
+            {countryToGuess.name && countryToGuess.flag &&
                 
                 <GameForm ref={formRef} onSubmit={(e)=>handleSubmit(e)}>
                     <Label>
-                        {answer.flag &&
-                           <img style={{display: 'block', margin: "auto"}} alt="country flag" width="200" src={answer.flag}/>
+                        {countryToGuess.flag &&
+                           <img style={{display: 'block', margin: "auto"}} alt="country flag" width="200" src={countryToGuess.flag}/>
                         }
 
-                        Quelle est la capitale de {answer.correctAnswer.name} :
+                        Quelle est la capitale de {countryToGuess.name} :
                         <Input type="text" name="answer" />
                     </Label>
                     <Input type="submit" value="Envoyer" />

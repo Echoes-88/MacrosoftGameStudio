@@ -1,4 +1,4 @@
-import { GameActionTypes, CounterActionTypes, CountriesDataType } from './types';
+import { GameActionTypes, CounterActionTypes, CountriesDataType, Country } from './types';
 
 
 
@@ -29,7 +29,8 @@ export const updateApiCall = (url: string, options: any, dataType: CountriesData
   dataType
 });
 
-// export const updateFlag = (flag: string) => ({
-//   type: GameActionTypes.UPDATE_FLAG,
-//   flag
-// });
+export const setCountryToGuess = (country: Country) => ({
+  type: GameActionTypes.SET_COUNTRY_TO_GUESS,
+  country
+});
+

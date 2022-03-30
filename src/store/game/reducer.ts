@@ -6,9 +6,14 @@ import { CountriesDataType, GameActions, GameActionTypes, gameState } from "./ty
 export const initialState: gameState = {
   data: {
     countries: [],
+    countryToGuess: {
+      name: undefined,
+      capital: undefined,
+      iso2: undefined,
+      flag: undefined
+    },
     badAnswersCount: 0, 
-    goodAnswersCount: 0,
-    flag: ""
+    goodAnswersCount: 0
   },
   apiCall: {
     url: "https://countriesnow.space/api/v0.1/countries/capital",
@@ -54,6 +59,17 @@ const game: Reducer<gameState, GameActions> = (state = initialState, action) => 
           options: action.options,
           url: action.url,
           dataType: action.dataType
+        }
+      };
+    }
+    case GameActionTypes.SET_COUNTRY_TO_GUESS: {
+      return { 
+        ...state, 
+        data: {
+          ...state.data,
+          countryToGuess: {
+            ...action.country
+          }
         }
       };
     }
