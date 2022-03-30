@@ -10,10 +10,9 @@ const gameMiddleware: Middleware<{}, RootState> = (store) => (next) => (action) 
     case GameActionTypes.GET_COUNTRIES_DATA : {
 
       store.dispatch(loading(true));
-console.log(action.options)
+
       axios.get(action.url, action.options)
         .then((response) => {
-          console.log(response)
           store.dispatch(updateCountriesData(response.data.data, action.dataType));
           store.dispatch(loading(false));
         })
